@@ -1,0 +1,12 @@
+export class ApiResponse {
+    statusCode;
+    message;
+    data;
+    constructor(statusCode, message, data) {
+        this.statusCode = statusCode;
+        this.message = message;
+        if (data !== undefined) {
+            this.data = data;
+        }
+    }
+}
