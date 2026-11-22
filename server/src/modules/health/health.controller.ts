@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 
-export const healthController = (req: Request, res: Response) => {
+export const getHealth = (req: Request, res: Response): void => {
   res.status(200).json({
     success: true,
     message: "404 Archive Api is running",
