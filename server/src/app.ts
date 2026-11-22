@@ -20,4 +20,10 @@ app.use(
   }),
 );
 
+// Route imports
+import healthRouter from "./modules/health/health.route.js";
+
+// Routes
+app.use("/api/v1/health", healthRouter);
+
 export default app;
