@@ -17,8 +17,10 @@ app.use(cors({
 // Route imports
 import healthRouter from "./modules/health/health.route.js";
 import { errorHandler } from "./middlewares/error.middleware.js";
+import { notFound } from "./middlewares/notFound.middleware.js";
 // Routes
 app.use("/api/v1/health", healthRouter);
 // Error handling middleware
+app.use(notFound);
 app.use(errorHandler);
 export default app;
