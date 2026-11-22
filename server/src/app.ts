@@ -22,8 +22,12 @@ app.use(
 
 // Route imports
 import healthRouter from "./modules/health/health.route.js";
+import { errorHandler } from "./middlewares/error.middleware.js";
 
 // Routes
 app.use("/api/v1/health", healthRouter);
+
+// Error handling middleware
+app.use(errorHandler);
 
 export default app;
