@@ -1,9 +1,9 @@
-import "dotenv/config";
 import app from "./app.js";
 import { connectDB } from "./config/db.js";
+import { config } from "./config/env.js";
 
-const PORT = process.env.PORT || 3000;
-const DB_URI = process.env.MONGODB_URI || "mongodb:////localhost:27017";
+const PORT = config.PORT;
+const DB_URI = config.DB_URI;
 
 await connectDB(DB_URI);
 
