@@ -5,6 +5,7 @@ import type {
   ErrorRequestHandler,
 } from "express";
 import { ApiError } from "../utils/ApiError.js";
+import logger from "../config/logger.js";
 
 export const errorHandler: ErrorRequestHandler = (
   err,
@@ -22,6 +23,7 @@ export const errorHandler: ErrorRequestHandler = (
     errors = err.errors;
   }
 
+  logger.error({ err });
   res.status(statusCode).json({
     statusCode: statusCode,
     success: false,
