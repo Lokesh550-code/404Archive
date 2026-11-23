@@ -10,5 +10,17 @@ const logger = pino({
             },
         }
         : {}),
+    redact: {
+        paths: [
+            "req.headers.authorization",
+            "req.headers.cookie",
+            "req.headers.x-api-key",
+            "res.headers.set-cookie",
+            "password",
+            "accessToken",
+            "refreshToken",
+        ],
+        remove: true,
+    },
 });
 export default logger;
