@@ -1,18 +1,24 @@
 import app from "./app.js";
 import { connectDB, disconnectDB } from "./config/db.js";
 import { config } from "./config/env.js";
+import logger from "./config/logger.js";
 const PORT = config.PORT;
 const DB_URI = config.DB_URI;
 await connectDB(DB_URI);
 const server = app.listen(PORT, () => {
-    console.log(`Server running on port: ${PORT}`);
+    logger.info(`Server running on port: ${PORT}`);
 });
 let isShuttingDown = false;
 const shutdown = async () => {
     if (isShuttingDown)
         return;
     isShuttingDown = true;
-    console.log("Graceful shutdown initiated");
+    logger.info("Graceful shutdown initiated");
+    const timeout = setTimeout(() => {
+        logger.warn("Shutdown timeout reached. Closing connections forcefully");
+        server.closeAllConnections();
+    }, 10000);
+    timeout.unref();
     try {
         await new Promise((resolve, reject) => {
             server.close((error) => {
@@ -23,13 +29,17 @@ const shutdown = async () => {
                 resolve();
             });
         });
-        console.log("HTTP server closed");
+        logger.info("HTTP server closed");
         await disconnectDB();
-        console.log("MongoDB disconnected");
+        process.exitCode = 0;
+        logger.info("MongoDB disconnected");
     }
-    catch (error) {
-        console.error("Error during shutdown: ", error);
+    catch (err) {
+        logger.error({ err }, "Error during shutdown");
         process.exitCode = 1;
+    }
+    finally {
+        clearTimeout(timeout);
     }
 };
 process.on("SIGINT", () => {

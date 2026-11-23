@@ -1,14 +1,16 @@
 import mongoose from "mongoose";
+import logger from "./logger.js";
 export const connectDB = async (MONGODB_URI) => {
     try {
         await mongoose.connect(MONGODB_URI);
-        console.log("Connected to DB");
+        logger.info("Connected to DB");
     }
-    catch (error) {
-        console.log("Error: ", error);
+    catch (err) {
+        logger.fatal({ err }, "DataBase connection failed");
         process.exit(1);
     }
 };
 export const disconnectDB = async () => {
     await mongoose.disconnect();
+    logger.info("Disconnected from DataBase");
 };
