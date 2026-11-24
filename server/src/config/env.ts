@@ -5,6 +5,8 @@ let PORT: number;
 let CORS_ORIGIN = process.env.CORS_ORIGIN;
 const NODE_ENV = process.env.NODE_ENV;
 const DB_URI = process.env.MONGODB_URI;
+const ACCESS_SECRET = process.env.ACCESS_SECRET;
+const REFRESH_SECRET = process.env.REFRESH_SECRET;
 
 if (!PORTSTRING) {
   throw new Error("Port is required");
@@ -34,4 +36,20 @@ if (
 if (!DB_URI) {
   throw new Error("DB URL is required");
 }
-export const config = { PORT, CORS_ORIGIN, NODE_ENV, DB_URI };
+
+if (!ACCESS_SECRET) {
+  throw new Error("Access SECRET is requied");
+}
+
+if (!REFRESH_SECRET) {
+  throw new Error("REFRESH SECRET is requied");
+}
+
+export const config = {
+  PORT,
+  CORS_ORIGIN,
+  NODE_ENV,
+  DB_URI,
+  ACCESS_SECRET,
+  REFRESH_SECRET,
+};
