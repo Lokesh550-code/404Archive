@@ -1,4 +1,4 @@
-import { Resend } from "resend";
+import { CreateEmailResponseSuccess, Resend } from "resend";
 import { ApiError } from "../utils/ApiError.js";
 import logger from "../config/logger.js";
 import type { SendEmailOptions } from "../types/sendEmailOptions.js";
@@ -6,7 +6,9 @@ import { config } from "../config/env.js";
 
 const resend = new Resend(config.RESEND_API_KEY);
 
-export const sendEmail = async (emailOptions: SendEmailOptions) => {
+export const sendEmail = async (
+  emailOptions: SendEmailOptions,
+): Promise<CreateEmailResponseSuccess> => {
   const sender = config.EMAIL_FROM;
   try {
     const { data, error } = await resend.emails.send({

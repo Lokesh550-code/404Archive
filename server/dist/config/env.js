@@ -6,6 +6,9 @@ const NODE_ENV = process.env.NODE_ENV;
 const DB_URI = process.env.MONGODB_URI;
 const ACCESS_SECRET = process.env.ACCESS_SECRET;
 const REFRESH_SECRET = process.env.REFRESH_SECRET;
+const RESEND_API_KEY = process.env.RESEND_API_KEY;
+const EMAIL_FROM = process.env.EMAIL_FROM;
+const VERIFICATION_URL = process.env.VERIFICATION_URL;
 if (!PORTSTRING) {
     throw new Error("Port is required");
 }
@@ -32,6 +35,15 @@ if (!ACCESS_SECRET) {
 if (!REFRESH_SECRET) {
     throw new Error("REFRESH SECRET is requied");
 }
+if (!RESEND_API_KEY) {
+    throw new Error("Resend Api key is requied");
+}
+if (!EMAIL_FROM) {
+    throw new Error("Sender email is required");
+}
+if (!VERIFICATION_URL) {
+    throw new Error("Verification url is required");
+}
 export const config = {
     PORT,
     CORS_ORIGIN,
@@ -39,4 +51,7 @@ export const config = {
     DB_URI,
     ACCESS_SECRET,
     REFRESH_SECRET,
+    RESEND_API_KEY,
+    EMAIL_FROM,
+    VERIFICATION_URL,
 };
