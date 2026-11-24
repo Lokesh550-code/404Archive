@@ -1,6 +1,6 @@
 import * as z from "zod";
 
-export const registerUser = z.strictObject({
+export const registerUserValidator = z.strictObject({
   username: z
     .string()
     .trim()

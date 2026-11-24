@@ -18,7 +18,7 @@ export const registerUser = async (
 
   const verificationUrl = config.VERIFICATION_URL;
 
-  let verificationEmailSent: boolean = false;
+  let verificationEmailSent: boolean = true;
 
   const user = await userModel.create({
     username,
@@ -39,9 +39,9 @@ export const registerUser = async (
         emailVerificationToken,
       ),
     );
-
-    verificationEmailSent = true;
-  } catch (err) {}
+  } catch (err) {
+    verificationEmailSent = false;
+  }
 
   return {
     userId: user._id.toString(),

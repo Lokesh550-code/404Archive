@@ -9,7 +9,7 @@ export const registerUser = async (email, username, password) => {
     const emailVerificationToken = generateToken();
     const emailVerificationTokenHash = hashToken(emailVerificationToken);
     const verificationUrl = config.VERIFICATION_URL;
-    let verificationEmailSent = false;
+    let verificationEmailSent = true;
     const user = await userModel.create({
         username,
         email,
@@ -22,9 +22,10 @@ export const registerUser = async (email, username, password) => {
     });
     try {
         await sendEmail(createVerificationEmail(user.email, verificationUrl, emailVerificationToken));
-        verificationEmailSent = true;
     }
-    catch (err) { }
+    catch (err) {
+        verificationEmailSent = false;
+    }
     return {
         userId: user._id.toString(),
         email: user.email,

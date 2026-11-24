@@ -7,6 +7,7 @@ import { requestLogger } from "./middlewares/requestLogger.middleware.js";
 
 // Route imports
 import healthRouter from "./modules/health/health.route.js";
+import authRouter from "./modules/auth/auth.route.js";
 import { errorHandler } from "./middlewares/error.middleware.js";
 import { notFound } from "./middlewares/notFound.middleware.js";
 
@@ -31,6 +32,7 @@ app.use(
 
 // Routes
 app.use("/api/v1/health", healthRouter);
+app.use("/api/v1/auth", authRouter);
 
 // Error handling middleware
 app.use(notFound);
