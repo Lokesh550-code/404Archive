@@ -6,6 +6,7 @@ import { generateToken, hashToken } from "../../utils/token.js";
 import { createVerificationEmail } from "../../templates/emails/verificationEmail.js";
 import { ApiError } from "../../utils/ApiError.js";
 import { generateAccessToken, generateRefreshToken } from "../../utils/jwt.js";
+import { AccessTokenPayload } from "../../types/accessTokenPayload.js";
 
 export const registerUser = async (
   email: string,
@@ -149,4 +150,19 @@ export const login = async (email: string, password: string) => {
     refreshToken,
     accessToken,
   };
+};
+
+export const logout = async (sub: string) => {
+  const user = await userModel.findById(sub);
+
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  user.refreshTokenHash = undefined;
+  user.refreshTokenExpiry = undefined;
+
+  await user.save();
+
+  return;
 };

@@ -1,11 +1,13 @@
 import type { Request, Response } from "express";
 import { asyncHandler } from "../../utils/asyncHandler.js";
-import { login, registerUser, verifyEmail } from "./auth.service.js";
+import { login, logout, registerUser, verifyEmail } from "./auth.service.js";
 import { ApiResponse } from "../../utils/ApiResponse.js";
 import {
   accessTokenCookieOptions,
   refreshTokenCookieOptions,
 } from "../../config/cookieOptions.js";
+import path from "path";
+import { ApiError } from "../../utils/ApiError.js";
 
 export const registerUserController = asyncHandler(
   async (req: Request, res: Response) => {
@@ -48,5 +50,23 @@ export const loginController = asyncHandler(
           email: user.email,
         }),
       );
+  },
+);
+
+export const logoutController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const user = req.user;
+
+    if (!user) {
+      throw new ApiError(401, "Unauthorized");
+    }
+
+    await logout(user.sub);
+
+    res
+      .status(200)
+      .clearCookie("refreshToken", { path: "/api/v1/auth/refresh" })
+      .clearCookie("accessToken")
+      .json(new ApiResponse(200, "Logout successful"));
   },
 );

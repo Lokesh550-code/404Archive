@@ -1,7 +1,8 @@
 import { asyncHandler } from "../../utils/asyncHandler.js";
-import { login, registerUser, verifyEmail } from "./auth.service.js";
+import { login, logout, registerUser, verifyEmail } from "./auth.service.js";
 import { ApiResponse } from "../../utils/ApiResponse.js";
 import { accessTokenCookieOptions, refreshTokenCookieOptions, } from "../../config/cookieOptions.js";
+import { ApiError } from "../../utils/ApiError.js";
 export const registerUserController = asyncHandler(async (req, res) => {
     const { email, username, password } = res.locals.validatedData;
     const user = await registerUser(email, username, password);
@@ -28,4 +29,16 @@ export const loginController = asyncHandler(async (req, res) => {
         username: user.username,
         email: user.email,
     }));
+});
+export const logoutController = asyncHandler(async (req, res) => {
+    const user = req.user;
+    if (!user) {
+        throw new ApiError(401, "Unauthorized");
+    }
+    await logout(user.sub);
+    res
+        .status(200)
+        .clearCookie("refreshToken", { path: "/api/v1/auth/refresh" })
+        .clearCookie("accessToken")
+        .json(new ApiResponse(200, "Logout successful"));
 });

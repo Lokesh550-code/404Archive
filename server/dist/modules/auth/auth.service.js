@@ -112,3 +112,13 @@ export const login = async (email, password) => {
         accessToken,
     };
 };
+export const logout = async (sub) => {
+    const user = await userModel.findById(sub);
+    if (!user) {
+        throw new ApiError(404, "User not found");
+    }
+    user.refreshTokenHash = undefined;
+    user.refreshTokenExpiry = undefined;
+    await user.save();
+    return;
+};

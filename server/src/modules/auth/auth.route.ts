@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   loginController,
+  logoutController,
   registerUserController,
   verifyEmailController,
 } from "./auth.controller.js";
@@ -10,6 +11,7 @@ import {
   registerUserValidator,
   verifyEmailValidator,
 } from "./auth.validatator.js";
+import { authenticate } from "../../middlewares/auth.middleware.js";
 
 const router = Router();
 
@@ -26,5 +28,7 @@ router.post(
 );
 
 router.post("/login", validate(loginValidator, "body"), loginController);
+
+router.post("/logout", authenticate, logoutController);
 
 export default router;
