@@ -4,6 +4,7 @@ import { sendEmail } from "../../services/email.service.js";
 import { hashPassword } from "../../utils/password.js";
 import { generateToken, hashToken } from "../../utils/token.js";
 import { createVerificationEmail } from "../../templates/emails/verificationEmail.js";
+import { ApiError } from "../../utils/ApiError.js";
 export const registerUser = async (email, username, password) => {
     const passwordHash = await hashPassword(password);
     const emailVerificationToken = generateToken();
@@ -31,5 +32,34 @@ export const registerUser = async (email, username, password) => {
         email: user.email,
         username: user.username,
         verificationEmailSent,
+    };
+};
+export const verifyEmail = async (emailVerificationToken) => {
+    const hashedEmailVerificationToken = hashToken(emailVerificationToken);
+    const user = await userModel
+        .findOne({
+        emailVerificationTokenHash: hashedEmailVerificationToken,
+    })
+        .select("+emailVerificationTokenHash +emailVerificationTokenExpiry");
+    if (!user) {
+        throw new ApiError(400, "Invalid email verification token");
+    }
+    if (user.isEmailVerified === true) {
+        throw new ApiError(400, "Email already Verified");
+    }
+    if (!user.emailVerificationTokenExpiry) {
+        throw new ApiError(500, "Email verification token expiry not found");
+    }
+    if (user.emailVerificationTokenExpiry <= new Date()) {
+        throw new ApiError(400, "Email verification token expired");
+    }
+    user.isEmailVerified = true;
+    user.emailVerificationTokenHash = undefined;
+    user.emailVerificationTokenExpiry = undefined;
+    const savedUser = await user.save();
+    return {
+        userId: savedUser._id.toString(),
+        email: savedUser.email,
+        isEmailVerified: savedUser.isEmailVerified,
     };
 };

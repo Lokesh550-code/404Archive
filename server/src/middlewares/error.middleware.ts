@@ -23,6 +23,11 @@ export const errorHandler: ErrorRequestHandler = (
     errors = err.errors;
   }
 
+  if (err.code === 11000) {
+    statusCode = 409;
+    message = "Resource already exists";
+  }
+
   logger.error({ err });
   res.status(statusCode).json({
     statusCode: statusCode,
