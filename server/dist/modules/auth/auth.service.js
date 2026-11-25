@@ -1,10 +1,11 @@
 import { config } from "../../config/env.js";
 import { userModel } from "../../models/user.model.js";
 import { sendEmail } from "../../services/email.service.js";
-import { hashPassword } from "../../utils/password.js";
+import { hashPassword, verifyPassword } from "../../utils/password.js";
 import { generateToken, hashToken } from "../../utils/token.js";
 import { createVerificationEmail } from "../../templates/emails/verificationEmail.js";
 import { ApiError } from "../../utils/ApiError.js";
+import { generateAccessToken, generateRefreshToken } from "../../utils/jwt.js";
 export const registerUser = async (email, username, password) => {
     const passwordHash = await hashPassword(password);
     const emailVerificationToken = generateToken();
@@ -61,5 +62,52 @@ export const verifyEmail = async (emailVerificationToken) => {
         userId: savedUser._id.toString(),
         email: savedUser.email,
         isEmailVerified: savedUser.isEmailVerified,
+    };
+};
+export const login = async (email, password) => {
+    const user = await userModel.findOne({ email }).select("+passwordHash");
+    if (!user) {
+        throw new ApiError(404, "User not found");
+    }
+    const isPasswordCorrect = await verifyPassword(user.passwordHash, password);
+    if (!isPasswordCorrect) {
+        throw new ApiError(400, "Incorrect Password");
+    }
+    const now = new Date();
+    let currentStatus = user.accountStatus;
+    const suspensionExpiresAt = user.suspensionExpiresAt ?? null;
+    if (currentStatus === "banned") {
+        throw new ApiError(403, "Account is banned");
+    }
+    else if (currentStatus === "suspended" && suspensionExpiresAt === null) {
+        throw new ApiError(403, "Suspension expiration time not found");
+    }
+    else if (currentStatus === "suspended" &&
+        suspensionExpiresAt !== null &&
+        suspensionExpiresAt > now) {
+        throw new ApiError(403, "Account is suspended");
+    }
+    else if (currentStatus === "suspended" &&
+        suspensionExpiresAt !== null &&
+        suspensionExpiresAt <= now) {
+        currentStatus = "active";
+    }
+    const accessToken = generateAccessToken({
+        sub: user._id.toString(),
+        role: user.role,
+    });
+    const refreshToken = generateRefreshToken(user._id.toString());
+    const refreshTokenHash = hashToken(refreshToken);
+    user.accountStatus = currentStatus;
+    user.refreshTokenHash = refreshTokenHash;
+    user.refreshTokenExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    await user.save();
+    return {
+        userId: user._id.toString(),
+        email: user.email,
+        username: user.username,
+        accountStatus: user.accountStatus,
+        refreshToken,
+        accessToken,
     };
 };
