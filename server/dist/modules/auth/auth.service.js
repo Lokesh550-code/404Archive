@@ -67,11 +67,11 @@ export const verifyEmail = async (emailVerificationToken) => {
 export const login = async (email, password) => {
     const user = await userModel.findOne({ email }).select("+passwordHash");
     if (!user) {
-        throw new ApiError(404, "User not found");
+        throw new ApiError(401, "Invalid email or password");
     }
     const isPasswordCorrect = await verifyPassword(user.passwordHash, password);
     if (!isPasswordCorrect) {
-        throw new ApiError(400, "Incorrect Password");
+        throw new ApiError(401, "Invalid email or password");
     }
     const now = new Date();
     let currentStatus = user.accountStatus;
@@ -91,6 +91,7 @@ export const login = async (email, password) => {
         suspensionExpiresAt !== null &&
         suspensionExpiresAt <= now) {
         currentStatus = "active";
+        user.suspensionExpiresAt = undefined;
     }
     const accessToken = generateAccessToken({
         sub: user._id.toString(),

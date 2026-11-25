@@ -17,3 +17,11 @@ export const registerUserValidator = z.strictObject({
 export const verifyEmailValidator = z.strictObject({
   emailVerificationToken: z.string(),
 });
+
+export const loginValidator = z.strictObject({
+  email: z.email().trim().toLowerCase(),
+  password: z
+    .string()
+    .min(8, "Password must be at least 8 characters long")
+    .max(128, "Password must be less than 128 characters long"),
+});

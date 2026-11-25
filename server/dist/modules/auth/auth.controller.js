@@ -1,6 +1,7 @@
 import { asyncHandler } from "../../utils/asyncHandler.js";
-import { registerUser, verifyEmail } from "./auth.service.js";
+import { login, registerUser, verifyEmail } from "./auth.service.js";
 import { ApiResponse } from "../../utils/ApiResponse.js";
+import { accessTokenCookieOptions, refreshTokenCookieOptions, } from "../../config/cookieOptions.js";
 export const registerUserController = asyncHandler(async (req, res) => {
     const { email, username, password } = res.locals.validatedData;
     const user = await registerUser(email, username, password);
@@ -14,4 +15,17 @@ export const verifyEmailController = asyncHandler(async (req, res) => {
     res
         .status(200)
         .json(new ApiResponse(200, "Email verification successful", user));
+});
+export const loginController = asyncHandler(async (req, res) => {
+    const { email, password } = res.locals.validatedData;
+    const user = await login(email, password);
+    res
+        .status(200)
+        .cookie("accessToken", user.accessToken, accessTokenCookieOptions)
+        .cookie("refreshToken", user.refreshToken, refreshTokenCookieOptions)
+        .json(new ApiResponse(200, "Login successful", {
+        userId: user.userId,
+        username: user.username,
+        email: user.email,
+    }));
 });
