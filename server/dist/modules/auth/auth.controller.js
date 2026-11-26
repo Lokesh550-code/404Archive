@@ -1,5 +1,5 @@
 import { asyncHandler } from "../../utils/asyncHandler.js";
-import { login, logout, registerUser, verifyEmail } from "./auth.service.js";
+import { login, logout, refresh, registerUser, verifyEmail, } from "./auth.service.js";
 import { ApiResponse } from "../../utils/ApiResponse.js";
 import { accessTokenCookieOptions, refreshTokenCookieOptions, } from "../../config/cookieOptions.js";
 import { ApiError } from "../../utils/ApiError.js";
@@ -41,4 +41,16 @@ export const logoutController = asyncHandler(async (req, res) => {
         .clearCookie("refreshToken", { path: "/api/v1/auth/refresh" })
         .clearCookie("accessToken")
         .json(new ApiResponse(200, "Logout successful"));
+});
+export const refreshController = asyncHandler(async (req, res) => {
+    const { refreshToken } = req.cookies ?? {};
+    if (!refreshToken) {
+        throw new ApiError(401, "Invalid refresh token");
+    }
+    const { accessToken, generatedRefreshToken } = await refresh(refreshToken);
+    res
+        .status(200)
+        .cookie("accessToken", accessToken, accessTokenCookieOptions)
+        .cookie("refreshToken", generatedRefreshToken, refreshTokenCookieOptions)
+        .json(new ApiResponse(200, "Refresh and access token generation successful"));
 });

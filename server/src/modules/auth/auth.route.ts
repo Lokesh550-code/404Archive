@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
   loginController,
   logoutController,
+  refreshController,
   registerUserController,
   verifyEmailController,
 } from "./auth.controller.js";
@@ -21,7 +22,7 @@ router.post(
   registerUserController,
 );
 
-router.post(
+router.get(
   "/verify-email/:emailVerificationToken",
   validate(verifyEmailValidator, "params"),
   verifyEmailController,
@@ -30,5 +31,7 @@ router.post(
 router.post("/login", validate(loginValidator, "body"), loginController);
 
 router.post("/logout", authenticate, logoutController);
+
+router.post("/refresh", refreshController);
 
 export default router;

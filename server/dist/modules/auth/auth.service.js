@@ -5,7 +5,7 @@ import { hashPassword, verifyPassword } from "../../utils/password.js";
 import { generateToken, hashToken } from "../../utils/token.js";
 import { createVerificationEmail } from "../../templates/emails/verificationEmail.js";
 import { ApiError } from "../../utils/ApiError.js";
-import { generateAccessToken, generateRefreshToken } from "../../utils/jwt.js";
+import { generateAccessToken, generateRefreshToken, verifyRefreshToken, } from "../../utils/jwt.js";
 export const registerUser = async (email, username, password) => {
     const passwordHash = await hashPassword(password);
     const emailVerificationToken = generateToken();
@@ -121,4 +121,32 @@ export const logout = async (sub) => {
     user.refreshTokenExpiry = undefined;
     await user.save();
     return;
+};
+export const refresh = async (refreshToken) => {
+    const verifiedRefreshToken = verifyRefreshToken(refreshToken);
+    const hashedRefreshToken = hashToken(refreshToken);
+    const generatedRefreshToken = generateRefreshToken(verifiedRefreshToken.sub);
+    const generatedRefreshTokenHash = hashToken(generatedRefreshToken);
+    const user = await userModel.findOneAndUpdate({
+        _id: verifiedRefreshToken.sub,
+        refreshTokenHash: hashedRefreshToken,
+        refreshTokenExpiry: { $gt: new Date() },
+        accountStatus: "active",
+    }, {
+        $set: {
+            refreshTokenHash: generatedRefreshTokenHash,
+            refreshTokenExpiry: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        },
+    }, { new: true });
+    if (!user) {
+        throw new ApiError(400, "Invalid or expired refresh token");
+    }
+    const accessToken = generateAccessToken({
+        sub: user._id.toString(),
+        role: user.role,
+    });
+    return {
+        accessToken,
+        generatedRefreshToken,
+    };
 };

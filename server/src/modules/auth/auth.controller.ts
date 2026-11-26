@@ -1,6 +1,12 @@
 import type { Request, Response } from "express";
 import { asyncHandler } from "../../utils/asyncHandler.js";
-import { login, logout, registerUser, verifyEmail } from "./auth.service.js";
+import {
+  login,
+  logout,
+  refresh,
+  registerUser,
+  verifyEmail,
+} from "./auth.service.js";
 import { ApiResponse } from "../../utils/ApiResponse.js";
 import {
   accessTokenCookieOptions,
@@ -68,5 +74,25 @@ export const logoutController = asyncHandler(
       .clearCookie("refreshToken", { path: "/api/v1/auth/refresh" })
       .clearCookie("accessToken")
       .json(new ApiResponse(200, "Logout successful"));
+  },
+);
+
+export const refreshController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { refreshToken } = req.cookies ?? {};
+
+    if (!refreshToken) {
+      throw new ApiError(401, "Invalid refresh token");
+    }
+
+    const { accessToken, generatedRefreshToken } = await refresh(refreshToken);
+
+    res
+      .status(200)
+      .cookie("accessToken", accessToken, accessTokenCookieOptions)
+      .cookie("refreshToken", generatedRefreshToken, refreshTokenCookieOptions)
+      .json(
+        new ApiResponse(200, "Refresh and access token generation successful"),
+      );
   },
 );
