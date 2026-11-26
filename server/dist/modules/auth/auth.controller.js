@@ -1,5 +1,5 @@
 import { asyncHandler } from "../../utils/asyncHandler.js";
-import { login, logout, refresh, registerUser, requestPasswordReset, resetPassword, verifyEmail, } from "./auth.service.js";
+import { login, logout, refresh, registerUser, requestPasswordReset, resendVerificationEmail, resetPassword, verifyEmail, } from "./auth.service.js";
 import { ApiResponse } from "../../utils/ApiResponse.js";
 import { accessTokenCookieOptions, refreshTokenCookieOptions, } from "../../config/cookieOptions.js";
 import { ApiError } from "../../utils/ApiError.js";
@@ -82,4 +82,11 @@ export const resetPasswordController = asyncHandler(async (req, res) => {
         .clearCookie("accessToken", accessTokenCookieOptions)
         .clearCookie("refreshToken", refreshTokenCookieOptions)
         .json(new ApiResponse(200, "Password reset successfully"));
+});
+export const resendVerificationEmailController = asyncHandler(async (req, res) => {
+    const { email } = res.locals.validatedData;
+    await resendVerificationEmail(email);
+    res
+        .status(200)
+        .json(new ApiResponse(200, "If your account requires verification, a verification email will be sent"));
 });

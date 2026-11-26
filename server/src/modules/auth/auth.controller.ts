@@ -6,6 +6,7 @@ import {
   refresh,
   registerUser,
   requestPasswordReset,
+  resendVerificationEmail,
   resetPassword,
   verifyEmail,
 } from "./auth.service.js";
@@ -145,5 +146,22 @@ export const resetPasswordController = asyncHandler(
       .clearCookie("accessToken", accessTokenCookieOptions)
       .clearCookie("refreshToken", refreshTokenCookieOptions)
       .json(new ApiResponse(200, "Password reset successfully"));
+  },
+);
+
+export const resendVerificationEmailController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { email } = res.locals.validatedData;
+
+    await resendVerificationEmail(email);
+
+    res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          "If your account requires verification, a verification email will be sent",
+        ),
+      );
   },
 );

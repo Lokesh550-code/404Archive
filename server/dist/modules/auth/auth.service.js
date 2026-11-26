@@ -200,3 +200,24 @@ export const resetPassword = async (resetPasswordToken, newPassword) => {
         throw new ApiError(400, "Invalid password reset token");
     }
 };
+export const resendVerificationEmail = async (email) => {
+    const user = await userModel.findOne({ email });
+    const verificationUrl = config.VERIFICATION_URL;
+    if (!user) {
+        return;
+    }
+    if (user.isEmailVerified) {
+        return;
+    }
+    const emailVerificationToken = generateToken();
+    const hashedEmailVerificationToken = hashToken(emailVerificationToken);
+    user.emailVerificationTokenHash = hashedEmailVerificationToken;
+    user.emailVerificationTokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    await user.save();
+    try {
+        await sendEmail(createVerificationEmail(user.email, verificationUrl, emailVerificationToken));
+    }
+    catch (error) {
+        throw new ApiError(503, "Unable to send email. Try again later");
+    }
+};

@@ -7,12 +7,14 @@ import {
   forgotPasswordController,
   verifyEmailController,
   resetPasswordController,
+  resendVerificationEmailController,
 } from "./auth.controller.js";
 import { validate } from "../../middlewares/validate.middleware.js";
 import {
   loginValidator,
   passwordResetRequestValidator,
   registerUserValidator,
+  resendEmailVerificationValidator,
   resetPasswordValidator,
   verifyEmailValidator,
 } from "./auth.validatator.js";
@@ -48,6 +50,12 @@ router.post(
   "/reset-password/:passwordResetToken",
   validate(resetPasswordValidator, "body"),
   resetPasswordController,
+);
+
+router.post(
+  "/resend-verification-email",
+  validate(resendEmailVerificationValidator, "body"),
+  resendVerificationEmailController,
 );
 
 export default router;
