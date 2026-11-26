@@ -10,6 +10,7 @@ const REFRESH_SECRET = process.env.REFRESH_SECRET;
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const EMAIL_FROM = process.env.EMAIL_FROM;
 const VERIFICATION_URL = process.env.VERIFICATION_URL;
+const RESET_URL = process.env.RESET_URL;
 
 if (!PORTSTRING) {
   throw new Error("Port is required");
@@ -60,6 +61,10 @@ if (!VERIFICATION_URL) {
   throw new Error("Verification url is required");
 }
 
+if (!RESET_URL) {
+  throw new Error("Rest url is required");
+}
+
 export const config = {
   PORT,
   CORS_ORIGIN,
@@ -70,4 +75,5 @@ export const config = {
   RESEND_API_KEY,
   EMAIL_FROM,
   VERIFICATION_URL,
+  RESET_URL,
 };

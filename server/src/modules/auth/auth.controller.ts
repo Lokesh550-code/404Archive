@@ -5,6 +5,7 @@ import {
   logout,
   refresh,
   registerUser,
+  requestPasswordReset,
   verifyEmail,
 } from "./auth.service.js";
 import { ApiResponse } from "../../utils/ApiResponse.js";
@@ -93,6 +94,33 @@ export const refreshController = asyncHandler(
       .cookie("refreshToken", generatedRefreshToken, refreshTokenCookieOptions)
       .json(
         new ApiResponse(200, "Refresh and access token generation successful"),
+      );
+  },
+);
+
+export const forgotPasswordController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { email } = res.locals.validatedData ?? {};
+
+    if (!email) {
+      throw new ApiError(400, "Invalid email");
+    }
+
+    const { resetEmailSent } = await requestPasswordReset(email);
+
+    if (!resetEmailSent) {
+      throw new ApiError(
+        503,
+        "Unable to send password reset email. Try again later",
+      );
+    }
+    res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          "If an account exists, a password reset link has been sent.",
+        ),
       );
   },
 );

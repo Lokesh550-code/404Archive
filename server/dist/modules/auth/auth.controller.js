@@ -1,5 +1,5 @@
 import { asyncHandler } from "../../utils/asyncHandler.js";
-import { login, logout, refresh, registerUser, verifyEmail, } from "./auth.service.js";
+import { login, logout, refresh, registerUser, requestPasswordReset, verifyEmail, } from "./auth.service.js";
 import { ApiResponse } from "../../utils/ApiResponse.js";
 import { accessTokenCookieOptions, refreshTokenCookieOptions, } from "../../config/cookieOptions.js";
 import { ApiError } from "../../utils/ApiError.js";
@@ -53,4 +53,17 @@ export const refreshController = asyncHandler(async (req, res) => {
         .cookie("accessToken", accessToken, accessTokenCookieOptions)
         .cookie("refreshToken", generatedRefreshToken, refreshTokenCookieOptions)
         .json(new ApiResponse(200, "Refresh and access token generation successful"));
+});
+export const forgotPasswordController = asyncHandler(async (req, res) => {
+    const { email } = res.locals.validatedData ?? {};
+    if (!email) {
+        throw new ApiError(400, "Invalid email");
+    }
+    const { resetEmailSent } = await requestPasswordReset(email);
+    if (!resetEmailSent) {
+        throw new ApiError(503, "Unable to send password reset email. Try again later");
+    }
+    res
+        .status(200)
+        .json(new ApiResponse(200, "If an account exists, a password reset link has been sent."));
 });

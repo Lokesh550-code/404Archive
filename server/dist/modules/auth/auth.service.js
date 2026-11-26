@@ -6,6 +6,7 @@ import { generateToken, hashToken } from "../../utils/token.js";
 import { createVerificationEmail } from "../../templates/emails/verificationEmail.js";
 import { ApiError } from "../../utils/ApiError.js";
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken, } from "../../utils/jwt.js";
+import { createPasswordResetEmail } from "../../templates/emails/passwordReset.js";
 export const registerUser = async (email, username, password) => {
     const passwordHash = await hashPassword(password);
     const emailVerificationToken = generateToken();
@@ -148,5 +149,33 @@ export const refresh = async (refreshToken) => {
     return {
         accessToken,
         generatedRefreshToken,
+    };
+};
+export const requestPasswordReset = async (email) => {
+    const resetPasswordUrl = config.RESET_URL;
+    const passwordResetToken = generateToken();
+    const hashedPasswordResetToken = hashToken(passwordResetToken);
+    const user = await userModel.findOneAndUpdate({ email }, {
+        $set: {
+            passwordResetTokenHash: hashedPasswordResetToken,
+            passwordResetTokenExpiry: new Date(Date.now() + 15 * 60 * 1000),
+        },
+    });
+    let resetEmailSent = false;
+    if (!user) {
+        resetEmailSent = true;
+        return {
+            resetEmailSent,
+        };
+    }
+    try {
+        await sendEmail(createPasswordResetEmail(email, resetPasswordUrl, passwordResetToken));
+        resetEmailSent = true;
+    }
+    catch (error) {
+        resetEmailSent = false;
+    }
+    return {
+        resetEmailSent,
     };
 };

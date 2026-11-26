@@ -10,7 +10,7 @@ import {
   generateRefreshToken,
   verifyRefreshToken,
 } from "../../utils/jwt.js";
-import { AccessTokenPayload } from "../../types/accessTokenPayload.js";
+import { createPasswordResetEmail } from "../../templates/emails/passwordReset.js";
 
 export const registerUser = async (
   email: string,
@@ -207,5 +207,41 @@ export const refresh = async (refreshToken: string) => {
   return {
     accessToken,
     generatedRefreshToken,
+  };
+};
+
+export const requestPasswordReset = async (email: string) => {
+  const resetPasswordUrl = config.RESET_URL;
+
+  const passwordResetToken = generateToken();
+  const hashedPasswordResetToken = hashToken(passwordResetToken);
+  const user = await userModel.findOneAndUpdate(
+    { email },
+    {
+      $set: {
+        passwordResetTokenHash: hashedPasswordResetToken,
+        passwordResetTokenExpiry: new Date(Date.now() + 15 * 60 * 1000),
+      },
+    },
+  );
+  let resetEmailSent: boolean = false;
+  if (!user) {
+    resetEmailSent = true;
+    return {
+      resetEmailSent,
+    };
+  }
+
+  try {
+    await sendEmail(
+      createPasswordResetEmail(email, resetPasswordUrl, passwordResetToken),
+    );
+    resetEmailSent = true;
+  } catch (error) {
+    resetEmailSent = false;
+  }
+
+  return {
+    resetEmailSent,
   };
 };
