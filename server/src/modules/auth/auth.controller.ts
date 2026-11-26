@@ -6,6 +6,7 @@ import {
   refresh,
   registerUser,
   requestPasswordReset,
+  resetPassword,
   verifyEmail,
 } from "./auth.service.js";
 import { ApiResponse } from "../../utils/ApiResponse.js";
@@ -13,7 +14,6 @@ import {
   accessTokenCookieOptions,
   refreshTokenCookieOptions,
 } from "../../config/cookieOptions.js";
-import path from "path";
 import { ApiError } from "../../utils/ApiError.js";
 
 export const registerUserController = asyncHandler(
@@ -122,5 +122,28 @@ export const forgotPasswordController = asyncHandler(
           "If an account exists, a password reset link has been sent.",
         ),
       );
+  },
+);
+
+export const resetPasswordController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { passwordResetToken } = req.params ?? {};
+    const { password } = res.locals.validatedData;
+
+    if (!passwordResetToken) {
+      throw new ApiError(400, "Invalid or missing password reset token");
+    }
+
+    if (typeof passwordResetToken !== "string") {
+      throw new ApiError(400, "Invalid password reset token");
+    }
+
+    await resetPassword(passwordResetToken, password);
+
+    res
+      .status(200)
+      .clearCookie("accessToken", accessTokenCookieOptions)
+      .clearCookie("refreshToken", refreshTokenCookieOptions)
+      .json(new ApiResponse(200, "Password reset successfully"));
   },
 );

@@ -29,3 +29,10 @@ export const loginValidator = z.strictObject({
 export const passwordResetRequestValidator = z.strictObject({
   email: z.email().trim().toLowerCase(),
 });
+
+export const resetPasswordValidator = z.strictObject({
+  password: z
+    .string()
+    .min(8, "Password must be at least 8 characters long")
+    .max(128, "Password must be less than 128 characters long"),
+});

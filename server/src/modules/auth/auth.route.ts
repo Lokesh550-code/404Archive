@@ -6,12 +6,14 @@ import {
   registerUserController,
   forgotPasswordController,
   verifyEmailController,
+  resetPasswordController,
 } from "./auth.controller.js";
 import { validate } from "../../middlewares/validate.middleware.js";
 import {
   loginValidator,
   passwordResetRequestValidator,
   registerUserValidator,
+  resetPasswordValidator,
   verifyEmailValidator,
 } from "./auth.validatator.js";
 import { authenticate } from "../../middlewares/auth.middleware.js";
@@ -40,6 +42,12 @@ router.post(
   "/forgot-password",
   validate(passwordResetRequestValidator, "body"),
   forgotPasswordController,
+);
+
+router.post(
+  "/reset-password/:passwordResetToken",
+  validate(resetPasswordValidator, "body"),
+  resetPasswordController,
 );
 
 export default router;

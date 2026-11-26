@@ -245,3 +245,33 @@ export const requestPasswordReset = async (email: string) => {
     resetEmailSent,
   };
 };
+
+export const resetPassword = async (
+  resetPasswordToken: string,
+  newPassword: string,
+) => {
+  const hashedResetPasswordToken = hashToken(resetPasswordToken);
+  const hashedPassword = await hashPassword(newPassword);
+
+  const user = await userModel.findOneAndUpdate(
+    {
+      passwordResetTokenHash: hashedResetPasswordToken,
+      passwordResetTokenExpiry: { $gt: new Date() },
+    },
+    {
+      $set: {
+        passwordHash: hashedPassword,
+      },
+      $unset: {
+        passwordResetTokenExpiry: 1,
+        passwordResetTokenHash: 1,
+        refreshTokenHash: 1,
+        refreshTokenExpiry: 1,
+      },
+    },
+  );
+
+  if (!user) {
+    throw new ApiError(400, "Invalid password reset token");
+  }
+};
