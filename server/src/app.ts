@@ -34,7 +34,7 @@ app.use(
 // Routes
 app.use("/api/v1/health", healthRouter);
 app.use("/api/v1/auth", authRouter);
-app.use("/api/v1/user", userRouter);
+app.use("/api/v1/users", userRouter);
 
 // Error handling middleware
 app.use(notFound);

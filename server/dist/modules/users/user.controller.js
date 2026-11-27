@@ -5,7 +5,7 @@ import { ApiResponse } from "../../utils/ApiResponse.js";
 export const getMeController = asyncHandler(async (req, res) => {
     const { sub } = req.user ?? {};
     if (typeof sub !== "string") {
-        throw new ApiError(400, "Invalid userId");
+        throw new ApiError(401, "Invalid userId");
     }
     const user = await getMe(sub);
     res

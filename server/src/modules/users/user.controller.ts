@@ -9,7 +9,7 @@ export const getMeController = asyncHandler(
     const { sub } = req.user ?? {};
 
     if (typeof sub !== "string") {
-      throw new ApiError(400, "Invalid userId");
+      throw new ApiError(401, "Invalid userId");
     }
 
     const user = await getMe(sub);

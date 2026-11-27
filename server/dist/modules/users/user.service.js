@@ -6,7 +6,7 @@ export const getMe = async (userId) => {
         throw new ApiError(404, "User not found");
     }
     return {
-        userId: user._id,
+        userId: user._id.toString(),
         username: user.username,
         email: user.email,
         role: user.role,

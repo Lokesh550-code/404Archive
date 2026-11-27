@@ -9,7 +9,7 @@ export const getMe = async (userId: string) => {
   }
 
   return {
-    userId: user._id,
+    userId: user._id.toString(),
     username: user.username,
     email: user.email,
     role: user.role,
