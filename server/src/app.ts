@@ -5,9 +5,10 @@ import cookieParser from "cookie-parser";
 import { config } from "./config/env.js";
 import { requestLogger } from "./middlewares/requestLogger.middleware.js";
 
-// Route imports
+// Route and middleware imports
 import healthRouter from "./modules/health/health.route.js";
 import authRouter from "./modules/auth/auth.route.js";
+import userRouter from "./modules/users/user.route.js";
 import { errorHandler } from "./middlewares/error.middleware.js";
 import { notFound } from "./middlewares/notFound.middleware.js";
 
@@ -33,6 +34,7 @@ app.use(
 // Routes
 app.use("/api/v1/health", healthRouter);
 app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/user", userRouter);
 
 // Error handling middleware
 app.use(notFound);
